@@ -254,6 +254,7 @@ stages:
           - checkout: self
 
           - task: Bash@3
+          #d
             displayName: 'Install DDN CLI'
             inputs:
               targetType: 'inline'
