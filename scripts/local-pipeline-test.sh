@@ -83,8 +83,8 @@ if [ -z "$APP_MY_SNOWFLAKE_JDBC_URL" ]; then
 fi
 
 # Run introspection from project root
-# The DDN CLI will handle the connector directory navigation
-if ddn connector introspect my_snowflake --connector-dir app/connector/my_snowflake; then
+# The DDN CLI will automatically find the connector configuration
+if ddn connector introspect my_snowflake; then
     print_success "Connector introspection completed"
 
     # Verify configuration was updated

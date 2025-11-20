@@ -110,15 +110,15 @@ stages:
                 # Ensure we're in the project root
                 cd $(Build.SourcesDirectory)
 
-                # Run introspection from project root
-                # The DDN CLI will handle the connector directory navigation
-                ddn connector introspect $(CONNECTOR_NAME) --connector-dir app/connector/$(CONNECTOR_NAME)
+                # Run introspection - DDN CLI expects to be run from project root
+                # It will automatically find the connector configuration
+                ddn connector introspect $(CONNECTOR_NAME)
 
                 # Verify the configuration was updated
                 if [ -f "app/connector/$(CONNECTOR_NAME)/configuration.json" ]; then
                   echo "✓ Configuration file updated successfully"
-                  echo "Tables found:"
-                  cat app/connector/$(CONNECTOR_NAME)/configuration.json | grep -o '"name"' | wc -l
+                  table_count=$(cat app/connector/$(CONNECTOR_NAME)/configuration.json | grep -o '"name"' | wc -l)
+                  echo "✓ Tables found: $table_count"
                 else
                   echo "✗ Configuration file not found!"
                   exit 1
