@@ -1,0 +1,685 @@
+kind: DataConnectorLink
+version: v1
+definition:
+  name: my_snowflake
+  url:
+    readWriteUrls:
+      read:
+        valueFromEnv: APP_MY_SNOWFLAKE_READ_URL
+      write:
+        valueFromEnv: APP_MY_SNOWFLAKE_WRITE_URL
+  headers:
+    Authorization:
+      valueFromEnv: APP_MY_SNOWFLAKE_AUTHORIZATION_HEADER
+  schema:
+    version: v0.1
+    schema:
+      scalar_types:
+        BIGDECIMAL:
+          representation:
+            type: bigdecimal
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: BIGDECIMAL
+                type: named
+            min:
+              result_type:
+                name: BIGDECIMAL
+                type: named
+            sum:
+              result_type:
+                name: BIGDECIMAL
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: BIGDECIMAL
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: BIGDECIMAL
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: BIGDECIMAL
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: BIGDECIMAL
+                type: named
+        BIGINTEGER:
+          representation:
+            type: biginteger
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: BIGINTEGER
+                type: named
+            min:
+              result_type:
+                name: BIGINTEGER
+                type: named
+            sum:
+              result_type:
+                name: BIGINTEGER
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: BIGINTEGER
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: BIGINTEGER
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: BIGINTEGER
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: BIGINTEGER
+                type: named
+        BOOLEAN:
+          representation:
+            type: boolean
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+        BYTES:
+          representation:
+            type: bytes
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+        DATE:
+          representation:
+            type: date
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: DATE
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: DATE
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: DATE
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: DATE
+                type: named
+        FLOAT32:
+          representation:
+            type: float32
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: FLOAT32
+                type: named
+            min:
+              result_type:
+                name: FLOAT32
+                type: named
+            sum:
+              result_type:
+                name: FLOAT32
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: FLOAT32
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: FLOAT32
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: FLOAT32
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: FLOAT32
+                type: named
+        FLOAT64:
+          representation:
+            type: float64
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: FLOAT64
+                type: named
+            min:
+              result_type:
+                name: FLOAT64
+                type: named
+            sum:
+              result_type:
+                name: FLOAT64
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: FLOAT64
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: FLOAT64
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: FLOAT64
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: FLOAT64
+                type: named
+        GEOGRAPHY:
+          representation:
+            type: geography
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+        GEOMETRY:
+          representation:
+            type: geometry
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+        INT8:
+          representation:
+            type: int8
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: INT8
+                type: named
+            min:
+              result_type:
+                name: INT8
+                type: named
+            sum:
+              result_type:
+                name: INT64
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: INT8
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: INT8
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: INT8
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: INT8
+                type: named
+        INT16:
+          representation:
+            type: int16
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: INT16
+                type: named
+            min:
+              result_type:
+                name: INT16
+                type: named
+            sum:
+              result_type:
+                name: INT64
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: INT16
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: INT16
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: INT16
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: INT16
+                type: named
+        INT32:
+          representation:
+            type: int32
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: INT32
+                type: named
+            min:
+              result_type:
+                name: INT32
+                type: named
+            sum:
+              result_type:
+                name: INT64
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: INT32
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: INT32
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: INT32
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: INT32
+                type: named
+        INT64:
+          representation:
+            type: int64
+          aggregate_functions:
+            avg:
+              result_type:
+                name: FLOAT64
+                type: named
+            max:
+              result_type:
+                name: INT64
+                type: named
+            min:
+              result_type:
+                name: INT64
+                type: named
+            sum:
+              result_type:
+                name: INT64
+                type: named
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: INT64
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: INT64
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: INT64
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: INT64
+                type: named
+        JSON:
+          representation:
+            type: json
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+        STRING:
+          representation:
+            type: string
+          aggregate_functions:
+            max:
+              result_type:
+                name: STRING
+                type: named
+            min:
+              result_type:
+                name: STRING
+                type: named
+          comparison_operators:
+            _contains:
+              type: custom
+              argument_type:
+                name: STRING
+                type: named
+            _eq:
+              type: equal
+            _in:
+              type: in
+            _like:
+              type: custom
+              argument_type:
+                name: STRING
+                type: named
+        TIMESTAMP:
+          representation:
+            type: timestamp
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: TIMESTAMP
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: TIMESTAMP
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: TIMESTAMP
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: TIMESTAMP
+                type: named
+        TIMESTAMPTZ:
+          representation:
+            type: timestamptz
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+            _gt:
+              type: custom
+              argument_type:
+                name: TIMESTAMPTZ
+                type: named
+            _gte:
+              type: custom
+              argument_type:
+                name: TIMESTAMPTZ
+                type: named
+            _in:
+              type: in
+            _lt:
+              type: custom
+              argument_type:
+                name: TIMESTAMPTZ
+                type: named
+            _lte:
+              type: custom
+              argument_type:
+                name: TIMESTAMPTZ
+                type: named
+        UUID:
+          representation:
+            type: uuid
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+        VECTOR:
+          representation:
+            type: json
+          aggregate_functions: {}
+          comparison_operators:
+            _eq:
+              type: equal
+      object_types:
+        PITCH:
+          fields:
+            BAT_SPEED:
+              type:
+                type: nullable
+                underlying_type:
+                  name: FLOAT64
+                  type: named
+              arguments: {}
+            BAT_SPEED_TOP_END:
+              type:
+                type: nullable
+                underlying_type:
+                  name: FLOAT64
+                  type: named
+              arguments: {}
+            BATTER_ACTION:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+            BATTER_ID:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+            GAME_NUMBER:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+            GAME_SEQ_NUM:
+              type:
+                type: nullable
+                underlying_type:
+                  name: BIGINTEGER
+                  type: named
+              arguments: {}
+            PITCH_ID:
+              type:
+                name: STRING
+                type: named
+              arguments: {}
+            PITCHER_ID:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+        PLAYER:
+          fields:
+            FIRST_NAME:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+            LAST_NAME:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+            PLAYER_ID:
+              type:
+                name: STRING
+                type: named
+              arguments: {}
+        SAMPLE_TABLE:
+          fields:
+            CREATED_AT:
+              type:
+                type: nullable
+                underlying_type:
+                  name: TIMESTAMP
+                  type: named
+              arguments: {}
+            ID:
+              type:
+                name: BIGINTEGER
+                type: named
+              arguments: {}
+            NAME:
+              type:
+                type: nullable
+                underlying_type:
+                  name: STRING
+                  type: named
+              arguments: {}
+      collections:
+        - name: SAMPLE_TABLE
+          arguments: {}
+          type: SAMPLE_TABLE
+          uniqueness_constraints:
+            SAMPLE_TABLE_PK:
+              unique_columns:
+                - ID
+          foreign_keys: {}
+        - name: PLAYER
+          arguments: {}
+          type: PLAYER
+          uniqueness_constraints:
+            PLAYER_PK:
+              unique_columns:
+                - PLAYER_ID
+          foreign_keys: {}
+        - name: PITCH
+          arguments: {}
+          type: PITCH
+          uniqueness_constraints:
+            PITCH_PK:
+              unique_columns:
+                - PITCH_ID
+          foreign_keys:
+            FK_BATTER:
+              column_mapping:
+                BATTER_ID: PLAYER_ID
+              foreign_collection: PLAYER
+            FK_PITCHER:
+              column_mapping:
+                PITCHER_ID: PLAYER_ID
+              foreign_collection: PLAYER
+      functions: []
+      procedures: []
+    capabilities:
+      version: 0.1.6
+      capabilities:
+        query:
+          aggregates: {}
+          variables: {}
+          explain: {}
+        mutation: {}
+        relationships:
+          relation_comparisons: {}
+          order_by_aggregate: {}

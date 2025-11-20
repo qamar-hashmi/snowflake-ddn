@@ -1,0 +1,20 @@
+kind: Connector
+version: v2
+definition:
+  name: my_snowflake
+  subgraph: app
+  source: hasura/snowflake:v1.2.0
+  context: .
+  envMapping:
+    FULLY_QUALIFY_NAMES:
+      fromEnv: APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES
+    HASURA_CONNECTOR_PORT:
+      fromEnv: APP_MY_SNOWFLAKE_HASURA_CONNECTOR_PORT
+    HASURA_SERVICE_TOKEN_SECRET:
+      fromEnv: APP_MY_SNOWFLAKE_HASURA_SERVICE_TOKEN_SECRET
+    JDBC_URL:
+      fromEnv: APP_MY_SNOWFLAKE_JDBC_URL
+    OTEL_EXPORTER_OTLP_ENDPOINT:
+      fromEnv: APP_MY_SNOWFLAKE_OTEL_EXPORTER_OTLP_ENDPOINT
+    OTEL_SERVICE_NAME:
+      fromEnv: APP_MY_SNOWFLAKE_OTEL_SERVICE_NAME

@@ -1,0 +1,15 @@
+services:
+  app_my_snowflake:
+    build:
+      context: .
+      dockerfile: .hasura-connector/Dockerfile.my_snowflake
+    environment:
+      FULLY_QUALIFY_NAMES: $APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES
+      HASURA_SERVICE_TOKEN_SECRET: $APP_MY_SNOWFLAKE_HASURA_SERVICE_TOKEN_SECRET
+      JDBC_URL: $APP_MY_SNOWFLAKE_JDBC_URL
+      OTEL_EXPORTER_OTLP_ENDPOINT: $APP_MY_SNOWFLAKE_OTEL_EXPORTER_OTLP_ENDPOINT
+      OTEL_SERVICE_NAME: $APP_MY_SNOWFLAKE_OTEL_SERVICE_NAME
+    extra_hosts:
+      - local.hasura.dev:host-gateway
+    ports:
+      - 5793:8080
