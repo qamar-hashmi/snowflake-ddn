@@ -237,7 +237,6 @@ stages:
     jobs:
       - deployment: DeployToDDN
         displayName: 'Deploy Supergraph to DDN'
-        environment: 'production'
         strategy:
           runOnce:
             deploy:
