@@ -13,3 +13,5 @@ services:
       - local.hasura.dev:host-gateway
     ports:
       - 5793:8080
+    volumes:
+      - ./configuration.json:/etc/connector/configuration.json
