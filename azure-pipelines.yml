@@ -259,15 +259,15 @@ stages:
                   displayName: 'Deploy Supergraph Build'
                   inputs:
                     targetType: 'inline'
-                  script: |
-                    echo "Deploying supergraph to DDN..."
+                    script: |
+                      echo "Deploying supergraph to DDN..."
 
-                    export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+                      export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
 
-                    # Apply the latest build to your DDN project
-                    ddn supergraph build apply --supergraph supergraph.yaml
+                      # Apply the latest build to your DDN project
+                      ddn supergraph build apply --supergraph supergraph.yaml
 
-                    echo "Deployment completed successfully"
+                      echo "Deployment completed successfully"
                   env:
                     HASURA_DDN_PAT: $(HASURA_DDN_PAT)
 
