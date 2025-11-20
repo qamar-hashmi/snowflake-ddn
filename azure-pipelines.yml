@@ -272,6 +272,6 @@ stages:
                 ddn project info
                 echo "Deployment verification completed"
 
-                  env:
-                    HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+              env:
+                HASURA_DDN_PAT: $(HASURA_DDN_PAT)
 
