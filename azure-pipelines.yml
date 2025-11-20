@@ -235,8 +235,8 @@ stages:
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
-      - deployment: DeployToDDN
-        displayName: 'Deploy Supergraph to DDN'
+      - job: DeployToDDN
+        displayName: "Deploy to DDN"
         strategy:
           runOnce:
             deploy:
