@@ -75,7 +75,6 @@ print_step "STAGE 1: INTROSPECTION"
 echo "========================================"
 
 print_step "Introspecting Snowflake connector"
-cd app/connector/my_snowflake
 
 # Check if JDBC_URL is set
 if [ -z "$APP_MY_SNOWFLAKE_JDBC_URL" ]; then
@@ -83,16 +82,22 @@ if [ -z "$APP_MY_SNOWFLAKE_JDBC_URL" ]; then
     exit 1
 fi
 
-# Run introspection
-if ddn connector introspect my_snowflake; then
+# Run introspection from project root
+# The DDN CLI will handle the connector directory navigation
+if ddn connector introspect my_snowflake --connector-dir app/connector/my_snowflake; then
     print_success "Connector introspection completed"
+
+    # Verify configuration was updated
+    if [ -f "app/connector/my_snowflake/configuration.json" ]; then
+        echo "  ✓ Configuration file updated"
+        table_count=$(grep -o '"name"' app/connector/my_snowflake/configuration.json | wc -l | tr -d ' ')
+        echo "  ✓ Found $table_count tables"
+    fi
 else
     print_error "Connector introspection failed"
+    echo "  Tip: Check your Snowflake credentials in .env file"
     exit 1
 fi
-
-# Return to project root
-cd ../../..
 
 print_step "Adding connector resources to metadata"
 if ddn connector-link update my_snowflake --subgraph app --add-all-resources; then

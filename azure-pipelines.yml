@@ -100,17 +100,30 @@ stages:
               targetType: 'inline'
               script: |
                 echo "Running connector introspection..."
-                
+
                 # Set environment variables
                 export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
                 export JDBC_SCHEMAS=$(JDBC_SCHEMAS)
                 export APP_MY_SNOWFLAKE_JDBC_URL=$(APP_MY_SNOWFLAKE_JDBC_URL)
                 export APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES=$(APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES)
-                
-                # Run introspection
-                cd app/connector/$(CONNECTOR_NAME)
-                ddn connector introspect $(CONNECTOR_NAME)
-                
+
+                # Ensure we're in the project root
+                cd $(Build.SourcesDirectory)
+
+                # Run introspection from project root
+                # The DDN CLI will handle the connector directory navigation
+                ddn connector introspect $(CONNECTOR_NAME) --connector-dir app/connector/$(CONNECTOR_NAME)
+
+                # Verify the configuration was updated
+                if [ -f "app/connector/$(CONNECTOR_NAME)/configuration.json" ]; then
+                  echo "✓ Configuration file updated successfully"
+                  echo "Tables found:"
+                  cat app/connector/$(CONNECTOR_NAME)/configuration.json | grep -o '"name"' | wc -l
+                else
+                  echo "✗ Configuration file not found!"
+                  exit 1
+                fi
+
                 echo "Introspection completed successfully"
             env:
               HASURA_DDN_PAT: $(HASURA_DDN_PAT)
