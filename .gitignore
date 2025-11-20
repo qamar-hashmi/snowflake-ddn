@@ -1,3 +1,6 @@
 engine/build
 /.env
 /.env.*
+/Azure*
+/Pipeline*
+/Setup*
