@@ -1,0 +1,289 @@
+# Azure DevOps Pipeline for Hasura DDN - Introspection and Supergraph Build
+# This pipeline introspects the Snowflake connector and builds the DDN supergraph
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - app/connector/**
+      - app/metadata/**
+      - globals/metadata/**
+      - supergraph.yaml
+      - app/subgraph.yaml
+      - globals/subgraph.yaml
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: hasura-ddn-variables
+  - name: DDN_CLI_VERSION
+    value: 'v4'
+  - name: CONNECTOR_NAME
+    value: 'my_snowflake'
+  - name: SUBGRAPH_NAME
+    value: 'app'
+
+stages:
+  - stage: Introspect
+    displayName: 'Introspect Snowflake Connector'
+    jobs:
+      - job: IntrospectConnector
+        displayName: 'Run Connector Introspection'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: Bash@3
+            displayName: 'Install DDN CLI'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Installing Hasura DDN CLI..."
+                curl -L https://graphql-engine-cdn.hasura.io/ddn/cli/$(DDN_CLI_VERSION)/get.sh | bash
+                
+                # Verify installation
+                ddn --version
+                
+                # Add to PATH for subsequent steps
+                echo "##vso[task.prependpath]$HOME/.ddn/bin"
+
+          - task: Bash@3
+            displayName: 'Configure DDN Authentication'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Configuring DDN authentication..."
+                
+                # Set the PAT for authentication
+                export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+                
+                # Verify authentication
+                ddn auth print-access-token
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
+          - task: Bash@3
+            displayName: 'Create Environment File'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Creating .env file for connector configuration..."
+                
+                cat > .env << EOF
+                APP_MY_SNOWFLAKE_AUTHORIZATION_HEADER=$(APP_MY_SNOWFLAKE_AUTHORIZATION_HEADER)
+                APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES=$(APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES)
+                APP_MY_SNOWFLAKE_HASURA_CONNECTOR_PORT=5793
+                APP_MY_SNOWFLAKE_HASURA_SERVICE_TOKEN_SECRET=$(APP_MY_SNOWFLAKE_HASURA_SERVICE_TOKEN_SECRET)
+                APP_MY_SNOWFLAKE_JDBC_URL=$(APP_MY_SNOWFLAKE_JDBC_URL)
+                APP_MY_SNOWFLAKE_OTEL_EXPORTER_OTLP_ENDPOINT=http://local.hasura.dev:4317
+                APP_MY_SNOWFLAKE_OTEL_SERVICE_NAME=app_my_snowflake
+                APP_MY_SNOWFLAKE_READ_URL=$(APP_MY_SNOWFLAKE_READ_URL)
+                APP_MY_SNOWFLAKE_WRITE_URL=$(APP_MY_SNOWFLAKE_WRITE_URL)
+                JDBC_SCHEMAS=$(JDBC_SCHEMAS)
+                EOF
+                
+                echo ".env file created successfully"
+
+          - task: Bash@3
+            displayName: 'Introspect Snowflake Connector'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Running connector introspection..."
+                
+                # Set environment variables
+                export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+                export JDBC_SCHEMAS=$(JDBC_SCHEMAS)
+                export APP_MY_SNOWFLAKE_JDBC_URL=$(APP_MY_SNOWFLAKE_JDBC_URL)
+                export APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES=$(APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES)
+                
+                # Run introspection
+                cd app/connector/$(CONNECTOR_NAME)
+                ddn connector introspect $(CONNECTOR_NAME)
+                
+                echo "Introspection completed successfully"
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+              JDBC_SCHEMAS: $(JDBC_SCHEMAS)
+              APP_MY_SNOWFLAKE_JDBC_URL: $(APP_MY_SNOWFLAKE_JDBC_URL)
+              APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES: $(APP_MY_SNOWFLAKE_FULLY_QUALIFY_NAMES)
+
+          - task: Bash@3
+            displayName: 'Add Connector Resources to Metadata'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Adding connector resources to metadata..."
+                
+                export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+                
+                # Navigate to project root
+                cd $(Build.SourcesDirectory)
+                
+                # Add resources from connector to subgraph
+                ddn connector-link update $(CONNECTOR_NAME) --subgraph $(SUBGRAPH_NAME) --add-all-resources
+                
+                echo "Connector resources added to metadata"
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Introspection Artifacts'
+            inputs:
+              PathtoPublish: 'app/connector/$(CONNECTOR_NAME)'
+              ArtifactName: 'connector-introspection'
+              publishLocation: 'Container'
+
+  - stage: Build
+    displayName: 'Build Supergraph'
+    dependsOn: Introspect
+    jobs:
+      - job: BuildSupergraph
+        displayName: 'Build DDN Supergraph'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: Bash@3
+            displayName: 'Install DDN CLI'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Installing Hasura DDN CLI..."
+                curl -L https://graphql-engine-cdn.hasura.io/ddn/cli/$(DDN_CLI_VERSION)/get.sh | bash
+                ddn --version
+                echo "##vso[task.prependpath]$HOME/.ddn/bin"
+
+          - task: Bash@3
+            displayName: 'Configure DDN Authentication'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Configuring DDN authentication..."
+                export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+                ddn auth print-access-token
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
+          - task: Bash@3
+            displayName: 'Build Supergraph'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Building DDN supergraph..."
+
+                export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+
+                # Build the supergraph
+                ddn supergraph build create --supergraph supergraph.yaml --description "Build from Azure DevOps Pipeline - Build $(Build.BuildNumber)"
+
+                echo "Supergraph build completed successfully"
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
+          - task: Bash@3
+            displayName: 'Generate Build Artifacts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Generating build artifacts..."
+
+                # Create build directory if it doesn't exist
+                mkdir -p engine/build
+
+                # Copy metadata to build directory
+                cp -r app/metadata/* engine/build/ || true
+                cp -r globals/metadata/* engine/build/ || true
+
+                echo "Build artifacts generated"
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Supergraph Build Artifacts'
+            inputs:
+              PathtoPublish: 'engine/build'
+              ArtifactName: 'supergraph-build'
+              publishLocation: 'Container'
+
+          - task: Bash@3
+            displayName: 'Validate Supergraph Build'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Validating supergraph build..."
+
+                export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+
+                # List recent builds
+                ddn supergraph build list --supergraph supergraph.yaml --limit 5
+
+                echo "Validation completed"
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
+  - stage: Deploy
+    displayName: 'Deploy to DDN (Optional)'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployToDDN
+        displayName: 'Deploy Supergraph to DDN'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  displayName: 'Checkout Repository'
+
+                - task: Bash@3
+                  displayName: 'Install DDN CLI'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      echo "Installing Hasura DDN CLI..."
+                      curl -L https://graphql-engine-cdn.hasura.io/ddn/cli/$(DDN_CLI_VERSION)/get.sh | bash
+                      ddn --version
+                      echo "##vso[task.prependpath]$HOME/.ddn/bin"
+
+                - task: Bash@3
+                  displayName: 'Deploy Supergraph Build'
+                  inputs:
+                    targetType: 'inline'
+                  script: |
+                    echo "Deploying supergraph to DDN..."
+
+                    export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+
+                    # Apply the latest build to your DDN project
+                    ddn supergraph build apply --supergraph supergraph.yaml
+
+                    echo "Deployment completed successfully"
+                  env:
+                    HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
+                - task: Bash@3
+                  displayName: 'Verify Deployment'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      echo "Verifying deployment..."
+
+                      export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+
+                      # Get project info
+                      ddn project info
+
+                      echo "Deployment verification completed"
+                  env:
+                    HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+
