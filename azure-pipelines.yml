@@ -237,52 +237,41 @@ stages:
     jobs:
       - job: DeployToDDN
         displayName: "Deploy to DDN"
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                  displayName: 'Checkout Repository'
+        steps:
+          - checkout: self
 
-                - task: Bash@3
-                  displayName: 'Install DDN CLI'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      echo "Installing Hasura DDN CLI..."
-                      curl -L https://graphql-engine-cdn.hasura.io/ddn/cli/$(DDN_CLI_VERSION)/get.sh | bash
-                      ddn --version
-                      echo "##vso[task.prependpath]$HOME/.ddn/bin"
+          - task: Bash@3
+            displayName: 'Install DDN CLI'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Installing Hasura DDN CLI..."
+                curl -L https://graphql-engine-cdn.hasura.io/ddn/cli/$(DDN_CLI_VERSION)/get.sh | bash
+                ddn --version
+                echo "##vso[task.prependpath]$HOME/.ddn/bin"
 
-                - task: Bash@3
-                  displayName: 'Deploy Supergraph Build'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      echo "Deploying supergraph to DDN..."
+          - task: Bash@3
+            displayName: 'Deploy Supergraph Build'
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Deploying supergraph to DDN..."
+                ddn supergraph build apply --supergraph supergraph.yaml
+                echo "Deployment completed successfully"
 
-                      export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
+          - task: Bash@3
+            displayName: 'Verify Deployment'
+            env:
+              HASURA_DDN_PAT: $(HASURA_DDN_PAT)
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Verifying deployment..."
+                ddn project info
+                echo "Deployment verification completed"
 
-                      # Apply the latest build to your DDN project
-                      ddn supergraph build apply --supergraph supergraph.yaml
-
-                      echo "Deployment completed successfully"
-                  env:
-                    HASURA_DDN_PAT: $(HASURA_DDN_PAT)
-
-                - task: Bash@3
-                  displayName: 'Verify Deployment'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      echo "Verifying deployment..."
-
-                      export HASURA_DDN_PAT=$(HASURA_DDN_PAT)
-
-                      # Get project info
-                      ddn project info
-
-                      echo "Deployment verification completed"
                   env:
                     HASURA_DDN_PAT: $(HASURA_DDN_PAT)
 
